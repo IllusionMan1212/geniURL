@@ -32,6 +32,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "fuse.js": "^6.6.2",
+    "genius-lyrics-api": "^3.2.0",
     "helmet": "^5.0.2",
     "js2xmlparser": "^4.0.2",
     "kleur": "^4.1.4",

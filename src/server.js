@@ -6,6 +6,7 @@ const { RateLimiterMemory } = require("rate-limiter-flexible");
 const k = require("kleur");
 const cors = require("cors");
 const jsonToXml = require("js2xmlparser");
+const { getLyrics } = require("genius-lyrics-api");
 
 const packageJson = require("../package.json");
 const error = require("./error");
@@ -102,6 +103,32 @@ function registerEndpoints()
             }
             catch(err)
             {
+                return respond(res, "serverError", `Encountered an internal server error${err instanceof Error ? err.message : ""}`, "json");
+            }
+        });
+
+        app.get("/lyrics", async (req, res) => {
+            try {
+                const { q, artist } = req.query;
+
+                if(hasArg(q) || hasArg(artist))
+                {
+                    const options = {
+                        apiKey: process.env.GENIUS_ACCESS_TOKEN,
+                        title: q,
+                        artist: artist,
+                        optimizeQuery: true,
+                    };
+                    const result = await getLyrics(options);
+
+                    if(!result)
+                        return respond(res, "clientError", "Found no results matching your search query", "json", 0);
+
+                    return respond(res, "success", { lyrics: result }, "json", 1);
+                }
+                else
+                    return respond(res, "clientError", "No search params (?q or ?song and ?artist) provided or they are invalid", req?.query?.format);
+            } catch (err) {
                 return respond(res, "serverError", `Encountered an internal server error${err instanceof Error ? err.message : ""}`, "json");
             }
         });
